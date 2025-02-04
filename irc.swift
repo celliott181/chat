@@ -1,6 +1,21 @@
 import Foundation
 import Network
 
+#if os(macOS)
+import Darwin
+#elseif os(Linux)
+import Glibc
+#endif
+
+// Define a signal handler function
+func handleSIGINT(signal: Int32) {
+    print("\nReceived SIGINT (Ctrl+C). Cleaning up and exiting...")
+    // Perform any cleanup tasks here
+    exit(0)
+}
+
+signal(SIGINT, handleSIGINT);
+
 protocol IRCCommand {
     func execute(connectionID: UUID, components: [String], server: IRCWebSocketServer)
 }
