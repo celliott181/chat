@@ -1,6 +1,20 @@
 import Foundation
 import Network
+
+#if os(macOS)
 import Darwin
+#elseif os(Linux)
+import Glibc
+#endif
+
+// Define a signal handler function
+func handleSIGINT(signal: Int32) {
+    print("\nReceived SIGINT (Ctrl+C). Cleaning up and exiting...")
+    // Perform any cleanup tasks here
+    exit(0)
+}
+
+signal(SIGINT, handleSIGINT);
 
 class IRCClient {
     private var connection: NWConnection
@@ -19,16 +33,18 @@ class IRCClient {
         connection.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                print("Connected to server")
+                self.messages.append("# Connected to server.")
+                self.renderUI()
                 self.receiveMessages()
             case .failed(let error):
-                print("Connection failed: \(error)")
+                print("# Connection failed: \(error)")
             default:
                 break
             }
         }
         
         connection.start(queue: .global())
+
         inputLoop()
     }
     
